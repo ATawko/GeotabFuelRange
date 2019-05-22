@@ -1,35 +1,52 @@
-api.call("Get", {
-    "typeName": "StatusData",
-    "search": {
-        "diagnosticSearch" : {
-            "id" : "DiagnosticFuelLevelId" //"DiagnosticFuelLevelId"
-        },
-        "fromDate" : "2019-05-20T03:00:00.000Z",
-        "toDate" : "2019-05-22T23:59:59.000Z"
-    }
-}, function(result) {
-    console.log("Done: ", result);
-    
-    var vehicleDataID = [];
-    var vehicleData = [];
-    
-    result.forEach(function(element) {
-        
-        if(vehicleDataID.indexOf(element.device.id) == -1){
-            vehicleDataID.push(element.device.id);
-            
-            var vehicleDataAry = [];
-            vehicleData.push(vehicleDataAry);
-        } 
-        
-        vehicleData[vehicleDataID.indexOf(element.device.id)].push(element);
-        
-    });
-    
-    
-    console.log(vehicleData);
-    
-    
-}, function(e) {
-    console.error("Failed:", e);
-});
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Fuel Range Test
+        </title>
+    </head>
+    <body>
+
+        <script>
+            api.call("Get", {
+                "typeName": "StatusData",
+                "search": {
+                    "diagnosticSearch" : {
+                        "id" : "DiagnosticFuelLevelId" //"DiagnosticFuelLevelId"
+                    },
+                    "fromDate" : "2019-05-20T03:00:00.000Z",
+                    "toDate" : "2019-05-22T23:59:59.000Z"
+                }
+            }, function(result) {
+                console.log("Done: ", result);
+                
+                var vehicleDataID = [];
+                var vehicleData = [];
+                
+                result.forEach(function(element) {
+                    
+                    if(vehicleDataID.indexOf(element.device.id) == -1){
+                        vehicleDataID.push(element.device.id);
+                        
+                        var vehicleDataAry = [];
+                        vehicleData.push(vehicleDataAry);
+                    } 
+                    
+                    vehicleData[vehicleDataID.indexOf(element.device.id)].push(element);
+                    
+                });
+                
+                
+                console.log(vehicleData);
+                
+                
+            }, function(e) {
+                console.error("Failed:", e);
+            });
+
+
+        </script>
+
+    </body>
+</html>
+
