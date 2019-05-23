@@ -21,12 +21,12 @@
 
 
         <script>
+            geotab.addin.myCustomPage1 = () =>{
+                var api;
+                var vehicleDataID = [];
+                var vehicleData = [];
 
-            var api;
-            var vehicleDataID = [];
-            var vehicleData = [];
-
-            function buildTable(){
+                function buildTable(){
                 let table = document.createElement("table");
                     table.className = "mainTable";
                 let thead = document.createElement("thead");
@@ -71,9 +71,7 @@
 
             }
 
-        // ------ Geotab Calls Below ---------
-
-        function geotabGetFuelData(){
+            function geotabGetFuelData(){
             api.call("Get", {
                 "typeName": "StatusData",
                 "search": {
@@ -134,12 +132,31 @@
 
         function geotabCalls(){
             
+            
 
             geotabGetFuelData();
             
         }
 
         document.getElementById("submitBtn").addEventListener("click", function(){geotabCalls()});
+                return {
+                    initialize(api, state, callback){
+                        callback();
+                    },
+                    focus(api, state){
+                        //user interface is avail
+                    },
+                    blur(api, state){
+                        //save Add-in state
+                    }
+                };
+            };
+            
+
+            
+
+        // ------ Geotab Calls Below ---------
+
 
 
         </script>
