@@ -4,45 +4,142 @@
         <title>
             Fuel Range Test
         </title>
+        <script src="api.js"> </script>
     </head>
     <body>
 
+        <div id="dateDiv">
+            Start Datetime: <input type="text" id="startDate" value="2019-05-20T03:00:00.000Z" size="45%">
+            </br>
+            End Datetime: <input type="text" id="endDate" value="2019-05-22T23:59:59.000Z" size="45%">
+            </br>
+            <input type="submit" id="submitBtn" value="Submit">
+            </br>
+        </div>
+
+        <div id="content"></div>
+
+
         <script>
+
+            var api;
+            var vehicleDataID = [];
+            var vehicleData = [];
+
+            function buildTable(){
+                let table = document.createElement("table");
+                    table.className = "mainTable";
+                let thead = document.createElement("thead");
+                let tbody = document.createElement("tbody");
+                let headRow = document.createElement("tr");
+
+                vehicleDataID.forEach(function(el){
+                    var th = document.createElement("th");
+                    th.appendChild(document.createTextNode(el));
+                    headRow.appendChild(th);
+                });
+
+                thead.appendChild(headRow);
+                table.appendChild(thead);
+
+                var maxLen = 0;
+                for (var col = 0; col < vehicleDataID.length; col++){
+
+                    if(maxLen < vehicleData[col].length)
+                        maxLen = vehicleData[col].length
+                }
+
+                for (var col = 0; col < maxLen; col++){
+                    var tr = document.createElement("tr");
+
+                    for (var row = 0; row < vehicleDataID.length; row++){
+                            var td = document.createElement("td");
+                            
+                            if(typeof vehicleData[row][col] !=='undefined'){
+                                td.appendChild(document.createTextNode(vehicleData[row][col]));
+                            }else{ td.appendChild(document.createTextNode("")); }
+
+                            tr.appendChild(td);
+                            tbody.appendChild(tr);
+                        }
+                    }
+                    
+                
+
+                table.appendChild(tbody);
+                return table;
+
+            }
+
+        // ------ Geotab Calls Below ---------
+
+        function geotabGetFuelData(){
             api.call("Get", {
                 "typeName": "StatusData",
                 "search": {
                     "diagnosticSearch" : {
-                        "id" : "DiagnosticFuelLevelId" //"DiagnosticFuelLevelId"
+                        "id" : "DiagnosticDeviceTotalFuelId" //"DiagnosticFuelLevelId" //"DiagnosticFuelLevelId"
                     },
                     "fromDate" : "2019-05-20T03:00:00.000Z",
                     "toDate" : "2019-05-22T23:59:59.000Z"
                 }
             }, function(result) {
-                console.log("Done: ", result);
-                
-                var vehicleDataID = [];
-                var vehicleData = [];
-                
+
                 result.forEach(function(element) {
-                    
                     if(vehicleDataID.indexOf(element.device.id) == -1){
                         vehicleDataID.push(element.device.id);
-                        
+
                         var vehicleDataAry = [];
                         vehicleData.push(vehicleDataAry);
                     } 
-                    
-                    vehicleData[vehicleDataID.indexOf(element.device.id)].push(element);
-                    
+                });
+
+                vehicleDataID.sort();
+
+                result.forEach(function(element2){
+                    vehicleData[vehicleDataID.indexOf(element2.device.id)].push(Math.round(element2.data * 100 + Number.EPSILON) / 100);
                 });
                 
-                
-                console.log(vehicleData);
-                
-                
+                geotabUpdateVehicleNames();
+
             }, function(e) {
                 console.error("Failed:", e);
             });
+
+        }
+
+        function geotabUpdateVehicleNames(){
+            var calls = [];
+
+            vehicleDataID.forEach(function(element){
+                calls.push(["Get",{typeName: "Device", search: {id:element}}]);
+            });
+
+            api.multiCall(calls, function(results){
+                results.forEach(function(element){
+                    vehicleDataID[vehicleDataID.indexOf(element[0].id)] = element[0].name;
+                });
+
+                document.getElementById("content").appendChild(buildTable());
+
+            }, function(errorString){
+                console.log(errorString);
+            });
+
+            
+            
+            //document.getElementById("content").appendChild(buildTable());
+
+        }
+
+        function geotabCalls(){
+            
+
+            geotabGetFuelData();
+            
+        }
+
+        document.getElementById("submitBtn").addEventListener("click", function(){geotabCalls()});
 
 
         </script>
